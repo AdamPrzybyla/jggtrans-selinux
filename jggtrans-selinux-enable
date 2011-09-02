@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Install SELinux policy modules
+for selinuxvariant in mls strict targeted
+  do
+    /usr/sbin/semodule -s ${selinuxvariant} -i \
+      /usr/share/selinux/${selinuxvariant}/jggtrans.pp &> /dev/null || :
+  done
+
+# Relabel ejabberd's files
+/sbin/restorecon -F -R -v /usr/sbin/jggtrans
+/sbin/restorecon -F -R -v /etc/rc.d/init.d/jggtrans
+/sbin/restorecon -F -R -v /etc/sysconfig/jggtrans
+/sbin/restorecon -F -R -v /var/lib/jggtrans
+/sbin/ldconfig

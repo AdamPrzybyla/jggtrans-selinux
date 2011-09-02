@@ -1,0 +1,333 @@
+
+## <summary>policy for jggtrans</summary>
+
+########################################
+## <summary>
+##	Execute a domain transition to run jggtrans.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`jggtrans_domtrans',`
+	gen_require(`
+		type jggtrans_t;
+                type jggtrans_exec_t;
+	')
+
+	domtrans_pattern($1,jggtrans_exec_t,jggtrans_t)
+')
+
+
+########################################
+## <summary>
+##	Execute jggtrans server in the jggtrans domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	The type of the process performing this action.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_script_domtrans',`
+	gen_require(`
+		type jggtrans_script_exec_t;
+	')
+
+	init_script_domtrans_spec($1,jggtrans_script_exec_t)
+')
+
+########################################
+## <summary>
+##	Do not audit attempts to read, 
+##	jggtrans tmp files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_dontaudit_read_tmp_files',`
+	gen_require(`
+		type jggtrans_tmp_t;
+	')
+
+	dontaudit $1 jggtrans_tmp_t:file read_file_perms;
+')
+
+########################################
+## <summary>
+##	Allow domain to read, jggtrans tmp files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_read_tmp_files',`
+	gen_require(`
+		type jggtrans_tmp_t;
+	')
+
+	allow $1 jggtrans_tmp_t:file read_file_perms;
+')
+
+########################################
+## <summary>
+##	Allow domain to manage jggtrans tmp files
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain to not audit.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_manage_tmp',`
+	gen_require(`
+		type jggtrans_tmp_t;
+	')
+
+         manage_dirs_pattern($1,jggtrans_tmp_t,jggtrans_tmp_t)
+         manage_files_pattern($1,jggtrans_tmp_t,jggtrans_tmp_t)
+         manage_lnk_files_pattern($1,jggtrans_tmp_t,jggtrans_tmp_t)
+')
+
+########################################
+## <summary>
+##	Search jggtrans lib directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_search_lib',`
+	gen_require(`
+		type jggtrans_var_lib_t;
+	')
+
+	allow $1 jggtrans_var_lib_t:dir search_dir_perms;
+	files_search_var_lib($1)
+')
+
+########################################
+## <summary>
+##	Read jggtrans lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_read_lib_files',`
+	gen_require(`
+		type jggtrans_var_lib_t;
+	')
+
+	files_search_var_lib($1)
+        read_files_pattern($1, jggtrans_var_lib_t, jggtrans_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete
+##	jggtrans lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_manage_lib_files',`
+	gen_require(`
+		type jggtrans_var_lib_t;
+	')
+
+	files_search_var_lib($1)
+        manage_files_pattern($1, jggtrans_var_lib_t,  jggtrans_var_lib_t)
+')
+
+########################################
+## <summary>
+##	Manage jggtrans var_lib files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_manage_var_lib',`
+	gen_require(`
+		type jggtrans_var_lib_t;
+	')
+
+         manage_dirs_pattern($1,jggtrans_var_lib_t,jggtrans_var_lib_t)
+         manage_files_pattern($1,jggtrans_var_lib_t,jggtrans_var_lib_t)
+         manage_lnk_files_pattern($1,jggtrans_var_lib_t,jggtrans_var_lib_t)
+')
+
+
+########################################
+## <summary>
+##	Search jggtrans conf directories.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_search_conf',`
+	gen_require(`
+		type jggtrans_etc_rw_t;
+	')
+
+	allow $1 jggtrans_etc_rw_t:dir search_dir_perms;
+	files_search_etc($1)
+')
+
+########################################
+## <summary>
+##	Read jggtrans conf files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_read_conf_files',`
+	gen_require(`
+		type jggtrans_etc_rw_t;
+	')
+
+	allow $1 jggtrans_etc_rw_t:file r_file_perms;
+	allow $1 jggtrans_etc_rw_t:dir list_dir_perms;
+	files_search_etc($1)
+')
+
+########################################
+## <summary>
+##	Create, read, write, and delete
+##	jggtrans conf files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_manage_conf_files',`
+	gen_require(`
+		type jggtrans_etc_rw_t;
+	')
+
+        manage_files_pattern($1,jggtrans_etc_rw_t,jggtrans_etc_rw_t)
+	files_search_etc($1)
+')
+
+########################################
+## <summary>
+##	Manage jggtrans etc_rw files.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_manage_conf',`
+	gen_require(`
+		type jggtrans_etc_rw_t;
+	')
+
+         manage_dirs_pattern($1,jggtrans_etc_rw_t,jggtrans_etc_rw_t)
+         manage_files_pattern($1,jggtrans_etc_rw_t,jggtrans_etc_rw_t)
+         manage_lnk_files_pattern($1,jggtrans_etc_rw_t,jggtrans_etc_rw_t)
+')
+
+
+########################################
+## <summary>
+##	Execute jggtrans in the jggtrans domain, and
+##	allow the specified role the jggtrans domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	The role to be allowed the jggtrans domain.
+##	</summary>
+## </param>
+## <param name="terminal">
+##	<summary>
+##	The type of the role's terminal.
+##	</summary>
+## </param>
+#
+interface(`jggtrans_run',`
+	gen_require(`
+		type jggtrans_t;
+	')
+
+	jggtrans_domtrans($1)
+	role $2 types jggtrans_t;
+	dontaudit jggtrans_t $3:chr_file rw_term_perms;
+')
+
+
+########################################
+## <summary>
+##	All of the rules required to administrate 
+##	an jggtrans environment
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	The role to be allowed to manage the syslog domain.
+##	</summary>
+## </param>
+## <param name="terminal">
+##	<summary>
+##	The type of the user terminal.
+##	</summary>
+## </param>
+## <rolecap/>
+#
+interface(`jggtrans_admin',`
+	gen_require(`
+		type jggtrans_t;
+	')
+
+	allow $1 jggtrans_t:process { ptrace signal_perms getattr };
+	read_files_pattern($1, jggtrans_t, jggtrans_t)
+	        
+
+	# Allow jggtrans_t to restart the apache service
+	jggtrans_script_domtrans($1)
+	domain_system_change_exemption($1)
+	role_transition $2 jggtrans_script_exec_t system_r;
+	allow $2 system_r;
+
+	jggtrans_manage_tmp($1)
+
+	jggtrans_manage_var_lib($1)
+
+	jggtrans_manage_conf($1)
+
+')

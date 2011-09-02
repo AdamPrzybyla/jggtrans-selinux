@@ -1,0 +1,4 @@
+/usr/sbin/jggtrans	--	gen_context(system_u:object_r:jggtrans_exec_t,s0)
+/etc/rc.d/init.d/jggtrans	--	gen_context(system_u:object_r:jggtrans_script_exec_t,s0)
+/etc/sysconfig/jggtrans		--	gen_context(system_u:object_r:jggtrans_etc_rw_t,s0)
+/var/lib/jggtrans(/.*)?			gen_context(system_u:object_r:jggtrans_var_lib_t,s0)

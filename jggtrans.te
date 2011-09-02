@@ -1,0 +1,137 @@
+policy_module(jggtrans,1.0.0)
+
+########################################
+#
+# Declarations
+#
+
+type jggtrans_t;
+type jggtrans_exec_t;
+domain_type(jggtrans_t)
+init_daemon_domain(jggtrans_t, jggtrans_exec_t)
+
+type jggtrans_script_exec_t;
+init_script_file(jggtrans_script_exec_t)
+
+type jggtrans_tmp_t;
+files_tmp_file(jggtrans_tmp_t)
+
+type jggtrans_var_lib_t;
+files_type(jggtrans_var_lib_t)
+
+type jggtrans_etc_rw_t;
+files_type(jggtrans_etc_rw_t)
+
+########################################
+#
+# jggtrans local policy
+#
+
+# Init script handling
+domain_use_interactive_fds(jggtrans_t)
+
+## internal communication is often done using fifo and unix sockets.
+allow jggtrans_t self:fifo_file rw_file_perms;
+allow jggtrans_t self:unix_stream_socket create_stream_socket_perms;
+
+files_read_etc_files(jggtrans_t)
+
+libs_use_ld_so(jggtrans_t)
+libs_use_shared_libs(jggtrans_t)
+
+miscfiles_read_localization(jggtrans_t)
+
+ifdef(`targeted_policy',`
+	term_dontaudit_use_unallocated_ttys(jggtrans_t)
+	term_dontaudit_use_generic_ptys(jggtrans_t)
+')
+
+
+allow jggtrans_t jggtrans_tmp_t:file manage_file_perms;
+allow jggtrans_t jggtrans_tmp_t:dir create_dir_perms;
+files_tmp_filetrans(jggtrans_t,jggtrans_tmp_t, { file dir })
+
+manage_dirs_pattern(jggtrans_t, jggtrans_var_lib_t,  jggtrans_var_lib_t)
+manage_files_pattern(jggtrans_t, jggtrans_var_lib_t,  jggtrans_var_lib_t)
+files_var_lib_filetrans(jggtrans_t, jggtrans_var_lib_t, { file dir } )
+
+allow jggtrans_t jggtrans_etc_rw_t:file manage_file_perms;
+allow jggtrans_t jggtrans_etc_rw_t:dir manage_dir_perms;
+files_etc_filetrans(jggtrans_t,jggtrans_etc_rw_t, { file dir })
+
+sysnet_dns_name_resolve(jggtrans_t)
+corenet_all_recvfrom_unlabeled(jggtrans_t)
+
+allow jggtrans_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_sendrecv_all_if(jggtrans_t)
+corenet_tcp_sendrecv_all_nodes(jggtrans_t)
+corenet_tcp_sendrecv_all_ports(jggtrans_t)
+corenet_tcp_bind_all_nodes(jggtrans_t)
+corenet_tcp_bind_all_ports(jggtrans_t)
+corenet_tcp_connect_all_ports(jggtrans_t)
+
+auth_use_nsswitch(jggtrans_t)
+
+logging_send_syslog_msg(jggtrans_t)
+
+auth_domtrans_chk_passwd(jggtrans_t)
+
+logging_send_audit_msgs(jggtrans_t)
+
+require {
+	type ejabberd_etc_rw_t;
+	type jggtrans_t;
+	class process signal;
+	class file read;
+}
+
+#============= jggtrans_t ==============
+allow jggtrans_t ejabberd_etc_rw_t:file read;
+allow jggtrans_t self:process signal;
+
+require {
+	type jggtrans_t;
+}
+
+#============= jggtrans_t ==============
+ppp_pid_filetrans(jggtrans_t)
+
+require {
+	type initrc_tmp_t;
+	type jggtrans_t;
+	class capability { setuid chown setgid };
+	class file { getattr append };
+}
+
+#============= jggtrans_t ==============
+allow jggtrans_t initrc_tmp_t:file { getattr append };
+allow jggtrans_t self:capability { setuid chown setgid };
+kernel_read_kernel_sysctls(jggtrans_t)
+ppp_manage_pid_files(jggtrans_t)
+
+require {
+	type jggtrans_exec_t;
+	type jggtrans_t;
+	class file execute_no_trans;
+}
+
+#============= jggtrans_t ==============
+allow jggtrans_t jggtrans_exec_t:file execute_no_trans;
+
+require {
+	type ejabberd_etc_rw_t;
+	type ejabberd_t;
+	type jggtrans_t;
+	type src_t;
+	type user_home_t;
+	class dir search;
+}
+
+#============= jggtrans_t ==============
+allow jggtrans_t ejabberd_etc_rw_t:dir search;
+#============= ejabberd_t ==============
+allow ejabberd_t user_home_t:dir search;
+
+#============= jggtrans_t ==============
+allow jggtrans_t src_t:dir search;
+
